@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">InClassAssignment6</string>
+    <string name="app_name">Chat Room</string>
+    <string name="edit_email_display"></string>
+    <string name="btnLogin_display">Login</string>
 </resources>

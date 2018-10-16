@@ -3,7 +3,7 @@ package com.groupr4.android.inclassassignment6;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class SignUpActivity extends AppCompatActivity {
+public class SignUp extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -54,7 +54,7 @@
         android:scaleType="fitCenter"
         app:layout_constraintStart_toEndOf="@+id/editText7"
         app:layout_constraintTop_toTopOf="@+id/editText7"
-        app:srcCompat="@drawable/addThread" />
+        app:srcCompat="@drawable/add_thread" />
 
     <ImageButton
         android:id="@+id/imageButton3"

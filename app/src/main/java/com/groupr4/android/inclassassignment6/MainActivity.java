@@ -37,8 +37,8 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient client;
     private static String token;
     private User user;
-    private static String user_key="User";
-    private static String token_key="Token";
+    public static String user_key="User";
+    public static String token_key="Token";
     private EditText email;
     private EditText password;
 

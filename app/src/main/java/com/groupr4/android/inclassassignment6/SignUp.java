@@ -38,8 +38,6 @@ public class SignUp extends AppCompatActivity {
     private final OkHttpClient client = new OkHttpClient();
     private User user;
     private String token;
-    private static String signup_user_key="User";
-    private static String signup_token_key="Token";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +50,7 @@ public class SignUp extends AppCompatActivity {
         confirmPasswordEdit = findViewById(R.id.editTextConfirmPassword);
         cancelButton = findViewById(R.id.buttonCancel);
         signUpButton = findViewById(R.id.buttonSignUp);
+        setTitle("Sign Up");
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,8 +132,8 @@ public class SignUp extends AppCompatActivity {
                             token = root.getString("token");
                             Intent int_login = new Intent(SignUp.this, Messages.class);
                             Bundle bnd = new Bundle();
-                            bnd.putSerializable(signup_user_key, user);
-                            bnd.putString(signup_token_key, token);
+                            bnd.putSerializable(MainActivity.user_key, user);
+                            bnd.putString(MainActivity.token_key, token);
                             int_login.putExtras(bnd);
                             startActivity(int_login);
                         }

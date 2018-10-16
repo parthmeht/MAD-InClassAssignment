@@ -1,12 +1,16 @@
 package com.groupr4.android.inclassassignment6;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -114,8 +118,15 @@ public class SignUp extends AppCompatActivity {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     try (ResponseBody responseBody = response.body()) {
-                        if (!response.isSuccessful())
-                            throw new IOException("Unexpected code " + response);
+                        if (!response.isSuccessful()){
+                            Log.d("API Error", response.body().string());
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(SignUp.this, "message", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
                         JSONObject root = new JSONObject(response.body().string());
                         String status = root.getString("status");
                         if (status.equalsIgnoreCase("ok")){
@@ -130,6 +141,18 @@ public class SignUp extends AppCompatActivity {
                     }catch (JSONException e) {
                         e.printStackTrace();
                     }
+                }
+            });
+        }
+    }
+
+    public void backgroundThreadShortToast(final String msg) {
+        if (msg != null) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
                 }
             });
         }

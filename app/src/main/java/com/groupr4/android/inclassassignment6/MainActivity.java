@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private User user;
     private static String user_key="User";
     private static String token_key="Token";
+    private EditText email;
+    private EditText password;
 
 
     @Override
@@ -45,9 +48,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final EditText email = (EditText) findViewById(R.id.edit_email);
-        final EditText password = (EditText) findViewById(R.id.edit_password);
-
+        email = (EditText) findViewById(R.id.edit_email);
+        password = (EditText) findViewById(R.id.edit_password);
+        password.setTransformationMethod(new PasswordTransformationMethod());
 
         btnLogin = findViewById(R.id.btnLogin);
         btnSignUp = findViewById(R.id.btnSignUp);
@@ -76,60 +79,9 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Enter password", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    String a = email.getText().toString().trim();
-                    String b = password.getText().toString().trim();
                     user = new User(email.getText().toString().trim(), password.getText().toString().trim());
                     Log.d("demo", user.toString());
-
-
-                    RequestBody formBody = new FormBody.Builder()
-                            .add("email", user.email)
-                            .add("password", user.password)
-                            .build();
-                    Request request = new Request.Builder()
-                            .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/login")
-                            .post(formBody)
-                            .build();
-
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-
-                        }
-
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-
-                            try (ResponseBody responseBody = response.body()) {
-                                if (!response.isSuccessful())
-                                    throw new IOException("Unexpected code " + response);
-                                JSONObject root = new JSONObject(response.body().string());
-                                String status = root.getString("status");
-                                user.firstName = root.getString("user_fname");
-                                user.lastName = root.getString("user_lname");
-                                token = root.getString("token");
-
-                                if (status.equals("ok")) {
-                                    Intent int_login = new Intent(MainActivity.this, Messages.class);
-                                    Bundle bnd = new Bundle();
-                                    bnd.putSerializable(MainActivity.user_key, user);
-                                    bnd.putString(MainActivity.token_key, token);
-                                    int_login.putExtras(bnd);
-                                    startActivity(int_login);
-
-
-                                } else {
-                                    Toast.makeText(MainActivity.this, "User do not exist", Toast.LENGTH_SHORT).show();
-                                }
-
-                                //Log.d("demo", per);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                    });
+                    login();
                 }
             }
         });
@@ -138,8 +90,50 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void getMessageThreads() {
+    private void login() {
+        RequestBody formBody = new FormBody.Builder()
+                .add("email", user.email)
+                .add("password", user.password)
+                .build();
+        Request request = new Request.Builder()
+                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/login")
+                .post(formBody)
+                .build();
 
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful())
+                        throw new IOException("Unexpected code " + response);
+                    JSONObject root = new JSONObject(response.body().string());
+                    String status = root.getString("status");
+                    user.firstName = root.getString("user_fname");
+                    user.lastName = root.getString("user_lname");
+                    token = root.getString("token");
+
+                    if (status.equals("ok")) {
+                        Intent int_login = new Intent(MainActivity.this, Messages.class);
+                        Bundle bnd = new Bundle();
+                        bnd.putSerializable(MainActivity.user_key, user);
+                        bnd.putString(MainActivity.token_key, token);
+                        int_login.putExtras(bnd);
+                        startActivity(int_login);
+                    } else {
+                        Toast.makeText(MainActivity.this, "User do not exist", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
     }
 
 

@@ -57,6 +57,7 @@ public class SignUp extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                MainActivity.dialog.show();
                 finish();
             }
         });
@@ -136,6 +137,7 @@ public class SignUp extends AppCompatActivity {
                         if (status.equalsIgnoreCase("ok")){
                             token = root.getString("token");
                             user.userId = root.getInt("user_id");
+                            MainActivity.dialog.show();
                             Intent int_login = new Intent(SignUp.this, Messages.class);
                             Bundle bnd = new Bundle();
                             bnd.putSerializable(MainActivity.user_key, user);

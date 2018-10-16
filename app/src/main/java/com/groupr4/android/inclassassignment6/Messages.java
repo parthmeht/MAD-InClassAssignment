@@ -52,6 +52,7 @@ public class Messages extends AppCompatActivity {
         add = (ImageButton) findViewById(R.id.imageButton2);
 
 
+        MainActivity.dialog.hide();
         if (getIntent() != null && getIntent().getExtras() != null) {
             user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
             token = (String) getIntent().getExtras().getString(MainActivity.token_key);
@@ -64,6 +65,7 @@ public class Messages extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 token = "";
+                MainActivity.dialog.show();
                 finish();
                 Intent intent_logOff = new Intent(Messages.this, MainActivity.class);
                 startActivity(intent_logOff);

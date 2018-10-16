@@ -2,8 +2,10 @@ package com.groupr4.android.inclassassignment6;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -67,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialog.show();
                 Intent int_signup=new Intent(MainActivity.this,SignUp.class);
                 startActivity(int_signup);
             }
@@ -136,12 +137,20 @@ public class MainActivity extends AppCompatActivity {
                     user.lastName = root.getString("user_lname");
                     user.userId = root.getInt("user_id");
                     token = root.getString("token");
-
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("Token",token);
+                            editor.apply();
+                        }
+                    });
                     if (status.equals("ok")) {
                         Intent int_login = new Intent(MainActivity.this, Messages.class);
                         Bundle bnd = new Bundle();
                         bnd.putSerializable(MainActivity.user_key, user);
-                        bnd.putString(MainActivity.token_key, token);
+                        //bnd.putString(MainActivity.token_key, token);
                         int_login.putExtras(bnd);
                         startActivity(int_login);
                     } else {

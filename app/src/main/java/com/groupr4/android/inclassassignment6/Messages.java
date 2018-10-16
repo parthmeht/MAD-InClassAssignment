@@ -1,6 +1,8 @@
 package com.groupr4.android.inclassassignment6;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -58,8 +60,16 @@ public class Messages extends AppCompatActivity {
             token = (String) getIntent().getExtras().getString(MainActivity.token_key);
             user_name = user.firstName + " " + user.lastName;
             userName.setText(user_name);
-            Log.d("tokenDemo", token);
-            getThreads();
+            //Log.d("tokenDemo", token);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            token = preferences.getString("Token", "");
+            if (!token.equalsIgnoreCase(""))
+                getThreads();
+            else{
+                finish();
+                Intent intent_logOff = new Intent(Messages.this, MainActivity.class);
+                startActivity(intent_logOff);
+            }
         }
         logOff.setOnClickListener(new View.OnClickListener() {
             @Override

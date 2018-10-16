@@ -2,10 +2,12 @@ package com.groupr4.android.inclassassignment6;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -57,7 +59,6 @@ public class SignUp extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.dialog.show();
                 finish();
             }
         });
@@ -137,11 +138,20 @@ public class SignUp extends AppCompatActivity {
                         if (status.equalsIgnoreCase("ok")){
                             token = root.getString("token");
                             user.userId = root.getInt("user_id");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putString("Token",token);
+                                    editor.apply();
+                                }
+                            });
                             MainActivity.dialog.show();
                             Intent int_login = new Intent(SignUp.this, Messages.class);
                             Bundle bnd = new Bundle();
                             bnd.putSerializable(MainActivity.user_key, user);
-                            bnd.putString(MainActivity.token_key, token);
+                            //bnd.putString(MainActivity.token_key, token);
                             int_login.putExtras(bnd);
                             startActivity(int_login);
                         }

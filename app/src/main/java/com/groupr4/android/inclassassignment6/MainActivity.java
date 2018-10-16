@@ -118,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                     String status = root.getString("status");
                     user.firstName = root.getString("user_fname");
                     user.lastName = root.getString("user_lname");
+                    user.userId = root.getInt("user_id");
                     token = root.getString("token");
 
                     if (status.equals("ok")) {

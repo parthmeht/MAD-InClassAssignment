@@ -135,6 +135,7 @@ public class SignUp extends AppCompatActivity {
                         String status = root.getString("status");
                         if (status.equalsIgnoreCase("ok")){
                             token = root.getString("token");
+                            user.userId = root.getInt("user_id");
                             Intent int_login = new Intent(SignUp.this, Messages.class);
                             Bundle bnd = new Bundle();
                             bnd.putSerializable(MainActivity.user_key, user);

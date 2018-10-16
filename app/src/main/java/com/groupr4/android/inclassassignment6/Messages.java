@@ -30,40 +30,41 @@ import okhttp3.ResponseBody;
 
 public class Messages extends AppCompatActivity {
 
-TextView userName;
-EditText newThread;
-ImageButton logOff, add, delete;
-String user_name, token;
-ListView lv;
+    TextView userName;
+    EditText newThread;
+    ImageButton logOff, add, delete;
+    String user_name, token;
+    ListView lv;
     ArrayAdapter<Threads> adapter;
-Threads t;
+    Threads t;
     ArrayList<Threads> result = null;
+    private final OkHttpClient client = new OkHttpClient();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
 
-        userName = (TextView)findViewById(R.id.textView);
-        newThread = (EditText)findViewById(R.id.editText7);
-        logOff = (ImageButton)findViewById(R.id.imageButton3);
-        add = (ImageButton)findViewById(R.id.imageButton2);
+        userName = (TextView) findViewById(R.id.textView);
+        newThread = (EditText) findViewById(R.id.editText7);
+        logOff = (ImageButton) findViewById(R.id.imageButton3);
+        add = (ImageButton) findViewById(R.id.imageButton2);
 
 
-        if(getIntent()!=null && getIntent().getExtras()!=null){
+        if (getIntent() != null && getIntent().getExtras() != null) {
             User user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
             token = (String) getIntent().getExtras().getString(MainActivity.token_key);
-            user_name = user.firstName.toString() + " "+ user.lastName.toString();
+            user_name = user.firstName + " " + user.lastName;
             userName.setText(user_name);
-            Log.d("tokenDemo",token.toString());
-
+            Log.d("tokenDemo", token);
+            getThreads();
         }
         logOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 token = "";
                 finish();
-                Intent intent_logOff = new Intent(Messages.this,MainActivity.class);
+                Intent intent_logOff = new Intent(Messages.this, MainActivity.class);
                 startActivity(intent_logOff);
             }
         });
@@ -72,15 +73,14 @@ Threads t;
             @Override
             public void onClick(View v) {
                 String text = newThread.getText().toString();
-                if(!(text.equals("") || text.equals(null)))
-                {
+                if (!(text.equals("") || text.equals(null))) {
                     t = new Threads();
                     OkHttpClient client = new OkHttpClient();
                     RequestBody formBody = new FormBody.Builder()
                             .add("title", text)
                             .build();
                     Request request = new Request.Builder()
-                            .header("Authorization","BEARER "+token)
+                            .header("Authorization", "BEARER " + token)
                             .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread/add")
                             .post(formBody)
                             .build();
@@ -100,14 +100,12 @@ Threads t;
                                 JSONObject root = new JSONObject(response.body().string());
                                 String status = root.getString("status");
                                 if (status.equals("ok")) {
-                                    String title = root.getString("title");
+                                    /*String title = root.getString("title");
                                     result.add(new Threads(title));
                                     setAdapter(result);
-                                    adapter.notifyDataSetChanged();
-
+                                    adapter.notifyDataSetChanged();*/
+                                    getThreads();
                                 }
-
-                                //Log.d("demo", per);
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -116,20 +114,25 @@ Threads t;
 
                     });
 
-                    /*t.title = text;
-                    result.add(t);
-
-
-*/
                 }
             }
         });
-        OkHttpClient client = new OkHttpClient();
+
+
+    }
+
+    private void setAdapter(ArrayList<Threads> s) {
+        lv = (ListView) findViewById(R.id.myListView);
+        adapter = new ArrayAdapter<Threads>(this, R.layout.message_list_view, R.id.textView3, result);
+        lv.setAdapter(adapter);
+    }
+
+    private void getThreads() {
         Request request = new Request.Builder()
-                .header("Authorization","BEARER "+token)
+                .header("Authorization", "BEARER " + token)
                 .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread")
                 .build();
-        client.newCall(request).enqueue(new Callback(){
+        client.newCall(request).enqueue(new Callback() {
 
             @Override
             public void onFailure(Call call, IOException e) {
@@ -143,7 +146,7 @@ Threads t;
                         throw new IOException("Unexpected code " + response);
                     JSONObject root = new JSONObject(responseBody.string());
                     String status = root.getString("status");
-                    if (status.equalsIgnoreCase("ok")){
+                    if (status.equalsIgnoreCase("ok")) {
                         result = new ArrayList<>();
                         JSONArray source = root.getJSONArray("threads");
                         for (int i = 0; i < source.length(); i++) {
@@ -155,9 +158,7 @@ Threads t;
                             threads.id = sourceJSON.getString("id");
                             threads.title = sourceJSON.getString("title");
                             threads.created_at = sourceJSON.getString("created_at");
-
                             result.add(threads);
-
                         }
 
                         runOnUiThread(new Runnable() {
@@ -165,8 +166,8 @@ Threads t;
                             @Override
                             public void run() {
                                 setAdapter(result);
-                                Log.d("addapDemo","main");
-                                }
+                                Log.d("addapDemo", "main");
+                            }
                         });
                     }
 
@@ -176,13 +177,5 @@ Threads t;
             }
 
         });
-
-    }
-    private void setAdapter(ArrayList<Threads> s) {
-        lv = (ListView)findViewById(R.id.myListView);
-          adapter = new ArrayAdapter<Threads>(this, R.layout.message_list_view, R.id.textView3, result);
-        lv.setAdapter(adapter);
-
-
     }
 }

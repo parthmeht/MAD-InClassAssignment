@@ -3,6 +3,7 @@ package com.groupr4.android.inclassassignment6;
 import java.io.Serializable;
 
 public class User implements Serializable {
+    Integer userId;
     String firstName;
     String lastName;
     String email;
@@ -23,7 +24,8 @@ public class User implements Serializable {
     @Override
     public String toString() {
         return "User{" +
-                "firstName='" + firstName + '\'' +
+                "userId=" + userId +
+                ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +

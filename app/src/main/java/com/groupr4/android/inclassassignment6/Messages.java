@@ -35,10 +35,11 @@ public class Messages extends AppCompatActivity {
     ImageButton logOff, add, delete;
     String user_name, token;
     ListView lv;
-    ArrayAdapter<Threads> adapter;
+    ThreadAdapter threadAdapter;
     Threads t;
     ArrayList<Threads> result = null;
     private final OkHttpClient client = new OkHttpClient();
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,7 @@ public class Messages extends AppCompatActivity {
 
 
         if (getIntent() != null && getIntent().getExtras() != null) {
-            User user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
+            user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
             token = (String) getIntent().getExtras().getString(MainActivity.token_key);
             user_name = user.firstName + " " + user.lastName;
             userName.setText(user_name);
@@ -121,10 +122,17 @@ public class Messages extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+    }
+
     private void setAdapter(ArrayList<Threads> s) {
+        MainActivity.dialog.hide();
         lv = (ListView) findViewById(R.id.myListView);
-        adapter = new ArrayAdapter<Threads>(this, R.layout.message_list_view, R.id.textView3, result);
-        lv.setAdapter(adapter);
+        threadAdapter = new ThreadAdapter(user, s,this);
+        lv.setAdapter(threadAdapter);
+
     }
 
     private void getThreads() {
@@ -154,8 +162,8 @@ public class Messages extends AppCompatActivity {
                             Threads threads = new Threads();
                             threads.user_fname = sourceJSON.getString("user_fname");
                             threads.user_lname = sourceJSON.getString("user_lname");
-                            threads.user_id = sourceJSON.getString("user_id");
-                            threads.id = sourceJSON.getString("id");
+                            threads.user_id = sourceJSON.getInt("user_id");
+                            threads.id = sourceJSON.getInt("id");
                             threads.title = sourceJSON.getString("title");
                             threads.created_at = sourceJSON.getString("created_at");
                             result.add(threads);

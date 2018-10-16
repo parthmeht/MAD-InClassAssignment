@@ -1,7 +1,8 @@
 package com.groupr4.android.inclassassignment6;
 
 public class Threads {
-    String user_fname, user_lname, user_id, id, title, created_at;
+    String user_fname, user_lname, title, created_at;
+    Integer id, user_id;
 
     public Threads() {
     }

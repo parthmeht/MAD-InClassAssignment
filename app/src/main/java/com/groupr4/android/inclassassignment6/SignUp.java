@@ -123,13 +123,13 @@ public class SignUp extends AppCompatActivity {
                 public void onResponse(Call call, Response response) throws IOException {
                     try (ResponseBody responseBody = response.body()) {
                         if (!response.isSuccessful()){
-                            Log.d("API Error", response.body().string());
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(SignUp.this, "message", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(SignUp.this, "Invalid Inputs", Toast.LENGTH_LONG).show();
                                 }
                             });
+                            throw new IOException("Unexpected code " + response);
                         }
                         JSONObject root = new JSONObject(response.body().string());
                         String status = root.getString("status");

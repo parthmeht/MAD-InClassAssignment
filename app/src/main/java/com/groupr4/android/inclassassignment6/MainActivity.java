@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
     public static String token_key="Token";
     private EditText email;
     private EditText password;
-
+    public static AlertDialog.Builder builder;
+    public static AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         btnSignUp = findViewById(R.id.btnSignUp);
         client = new OkHttpClient();
+
+        builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        builder.setTitle("Loading").setView(inflater.inflate(R.layout.dialog_bar, null));
+        dialog = builder.create();
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                     else {
                         user = new User(email.getText().toString().trim(), password.getText().toString().trim());
                         Log.d("demo", user.toString());
+                        dialog.show();
                         login();
                     }
                 } else{
@@ -87,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
 
     }
 
@@ -112,8 +119,16 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
 
                 try (ResponseBody responseBody = response.body()) {
-                    if (!response.isSuccessful())
+                    if (!response.isSuccessful()){
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.hide();
+                                Toast.makeText(MainActivity.this, "Invalid Inputs", Toast.LENGTH_LONG).show();
+                            }
+                        });
                         throw new IOException("Unexpected code " + response);
+                    }
                     JSONObject root = new JSONObject(response.body().string());
                     String status = root.getString("status");
                     user.firstName = root.getString("user_fname");

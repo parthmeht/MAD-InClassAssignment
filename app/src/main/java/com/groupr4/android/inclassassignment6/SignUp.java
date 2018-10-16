@@ -2,6 +2,8 @@ package com.groupr4.android.inclassassignment6;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
@@ -62,34 +64,37 @@ public class SignUp extends AppCompatActivity {
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (firstNameEdit.getText() == null || firstNameEdit.getText().toString().equalsIgnoreCase("")){
-                    firstNameEdit.setError("Enter First Name");
+                if (isConnected()){
+                    if (firstNameEdit.getText() == null || firstNameEdit.getText().toString().equalsIgnoreCase("")){
+                        firstNameEdit.setError("Enter First Name");
+                    }
+                    else if (lastNameEdit.getText() == null || lastNameEdit.getText().toString().equalsIgnoreCase("")){
+                        lastNameEdit.setError("Enter Last Name");
+                    }
+                    else if (emailEdit.getText() == null || emailEdit.getText().toString().equalsIgnoreCase("")){
+                        emailEdit.setError("Enter Email Id");
+                    }
+                    else if (passwordEdit.getText() == null || passwordEdit.getText().toString().equalsIgnoreCase("")){
+                        passwordEdit.setError("Enter Password");
+                    }
+                    else if (confirmPasswordEdit.getText() == null || confirmPasswordEdit.getText().toString().equalsIgnoreCase("")){
+                        confirmPasswordEdit.setError("Enter Confirm Password");
+                    }
+                    else if (passwordEdit.getText() != null
+                            && !passwordEdit.getText().toString().equalsIgnoreCase("")
+                            && confirmPasswordEdit.getText() != null
+                            && !confirmPasswordEdit.getText().toString().equalsIgnoreCase("")
+                            && !passwordEdit.getText().toString().equalsIgnoreCase(confirmPasswordEdit.getText().toString())){
+                        confirmPasswordEdit.setError("Password and Confirm Password does not match");
+                    }
+                    else {
+                        user = new User(firstNameEdit.getText().toString(),lastNameEdit.getText().toString(),emailEdit.getText().toString(),passwordEdit.getText().toString());
+                        Log.d("User",user.toString());
+                        signUp();
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
                 }
-                else if (lastNameEdit.getText() == null || lastNameEdit.getText().toString().equalsIgnoreCase("")){
-                    lastNameEdit.setError("Enter Last Name");
-                }
-                else if (emailEdit.getText() == null || emailEdit.getText().toString().equalsIgnoreCase("")){
-                    emailEdit.setError("Enter Email Id");
-                }
-                else if (passwordEdit.getText() == null || passwordEdit.getText().toString().equalsIgnoreCase("")){
-                    passwordEdit.setError("Enter Password");
-                }
-                else if (confirmPasswordEdit.getText() == null || confirmPasswordEdit.getText().toString().equalsIgnoreCase("")){
-                    confirmPasswordEdit.setError("Enter Confirm Password");
-                }
-                else if (passwordEdit.getText() != null
-                        && !passwordEdit.getText().toString().equalsIgnoreCase("")
-                        && confirmPasswordEdit.getText() != null
-                        && !confirmPasswordEdit.getText().toString().equalsIgnoreCase("")
-                        && !passwordEdit.getText().toString().equalsIgnoreCase(confirmPasswordEdit.getText().toString())){
-                       confirmPasswordEdit.setError("Password and Confirm Password does not match");
-                }
-                else {
-                    user = new User(firstNameEdit.getText().toString(),lastNameEdit.getText().toString(),emailEdit.getText().toString(),passwordEdit.getText().toString());
-                    Log.d("User",user.toString());
-                    signUp();
-                }
-
             }
         });
     }
@@ -155,5 +160,17 @@ public class SignUp extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo == null || !networkInfo.isConnected() ||
+                (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
+                        && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
+            return false;
+        }
+        return true;
     }
 }

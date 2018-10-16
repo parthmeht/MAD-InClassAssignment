@@ -61,28 +61,30 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent int_signup=new Intent(MainActivity.this,SignUp.class);
                 startActivity(int_signup);
-
-
             }
         });
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (isConnected()){
+                    if(email.getText().toString().trim().length()==0 )
+                    {
+                        Toast.makeText(MainActivity.this, "Enter email", Toast.LENGTH_SHORT).show();
+                    }
+                    else if(password.getText().toString().trim().length()==0)
+                    {
+                        Toast.makeText(MainActivity.this, "Enter password", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        user = new User(email.getText().toString().trim(), password.getText().toString().trim());
+                        Log.d("demo", user.toString());
+                        login();
+                    }
+                } else{
+                    Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
+                }
 
-                if(email.getText().toString().trim().length()==0 )
-                {
-                    Toast.makeText(MainActivity.this, "Enter email", Toast.LENGTH_SHORT).show();
-                }
-                else if(password.getText().toString().trim().length()==0)
-                {
-                    Toast.makeText(MainActivity.this, "Enter password", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    user = new User(email.getText().toString().trim(), password.getText().toString().trim());
-                    Log.d("demo", user.toString());
-                    login();
-                }
             }
         });
 
@@ -136,19 +138,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     private boolean isConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        if (networkInfo == null || !networkInfo.isConnected() ||
-                (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
-                        && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
+            if (networkInfo == null || !networkInfo.isConnected() ||
+                    (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
+                            && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
             return false;
         }
         return true;
     }
-
 
 }
 

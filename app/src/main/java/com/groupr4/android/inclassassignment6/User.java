@@ -1,6 +1,8 @@
 package com.groupr4.android.inclassassignment6;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     String firstName;
     String lastName;
     String email;
@@ -16,5 +18,15 @@ public class User {
     public User(String email, String password) {
         this.email = email;
         this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                '}';
     }
 }

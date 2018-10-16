@@ -1,10 +1,15 @@
 package com.groupr4.android.inclassassignment6;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -15,6 +20,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class SignUp extends AppCompatActivity {
 
@@ -27,6 +33,10 @@ public class SignUp extends AppCompatActivity {
     private Button signUpButton;
     private final OkHttpClient client = new OkHttpClient();
     private User user;
+    private String token;
+    private static String signup_user_key="User";
+    private static String signup_token_key="Token";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +48,13 @@ public class SignUp extends AppCompatActivity {
         confirmPasswordEdit = findViewById(R.id.editTextConfirmPassword);
         cancelButton = findViewById(R.id.buttonCancel);
         signUpButton = findViewById(R.id.buttonSignUp);
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,6 +83,7 @@ public class SignUp extends AppCompatActivity {
                 }
                 else {
                     user = new User(firstNameEdit.getText().toString(),lastNameEdit.getText().toString(),emailEdit.getText().toString(),passwordEdit.getText().toString());
+                    Log.d("User",user.toString());
                     signUp();
                 }
 
@@ -83,7 +101,7 @@ public class SignUp extends AppCompatActivity {
                     .add("lname",user.lastName)
                     .build();
             Request request = new Request.Builder()
-                    .url("https://en.wikipedia.org/w/index.php")
+                    .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/signup")
                     .post(formBody)
                     .build();
 
@@ -95,7 +113,23 @@ public class SignUp extends AppCompatActivity {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
-
+                    try (ResponseBody responseBody = response.body()) {
+                        if (!response.isSuccessful())
+                            throw new IOException("Unexpected code " + response);
+                        JSONObject root = new JSONObject(response.body().string());
+                        String status = root.getString("status");
+                        if (status.equalsIgnoreCase("ok")){
+                            token = root.getString("token");
+                            Intent int_login = new Intent(SignUp.this, Messages.class);
+                            Bundle bnd = new Bundle();
+                            bnd.putSerializable(signup_user_key, user);
+                            bnd.putString(signup_token_key, token);
+                            int_login.putExtras(bnd);
+                            startActivity(int_login);
+                        }
+                    }catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }

@@ -89,6 +89,10 @@ public class SignUp extends AppCompatActivity {
                             && !passwordEdit.getText().toString().equalsIgnoreCase(confirmPasswordEdit.getText().toString())){
                         confirmPasswordEdit.setError("Password and Confirm Password does not match");
                     }
+                    else if(passwordEdit.getText().length()<6 || confirmPasswordEdit.getText().length()<6)
+                    {
+                        passwordEdit.setError("Password has to be 6 or more than 6 characters");
+                    }
                     else {
                         user = new User(firstNameEdit.getText().toString(),lastNameEdit.getText().toString(),emailEdit.getText().toString(),passwordEdit.getText().toString());
                         Log.d("User",user.toString());
@@ -146,6 +150,7 @@ public class SignUp extends AppCompatActivity {
                                     SharedPreferences.Editor editor = preferences.edit();
                                     editor.putString("Token",token);
                                     editor.apply();
+                                    Toast.makeText(SignUp.this, "User Created Successfully", Toast.LENGTH_LONG).show();
                                 }
                             });
                             Intent int_login = new Intent(SignUp.this, Messages.class);

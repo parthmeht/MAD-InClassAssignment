@@ -101,6 +101,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MainActivity.dialog.hide();
+    }
+
     private void login() {
         RequestBody formBody = new FormBody.Builder()
                 .add("email", user.email)
@@ -144,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor = preferences.edit();
                             editor.putString("Token",token);
                             editor.apply();
+                            Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
                         }
                     });
                     if (status.equals("ok")) {

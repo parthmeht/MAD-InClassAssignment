@@ -1,7 +1,10 @@
 package com.groupr4.android.inclassassignment6;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -88,47 +91,51 @@ public class Messages extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String text = newThread.getText().toString();
-                if (!(text.equals("") || text.equals(null))) {
-                    t = new Threads();
-                    OkHttpClient client = new OkHttpClient();
-                    RequestBody formBody = new FormBody.Builder()
-                            .add("title", text)
-                            .build();
-                    Request request = new Request.Builder()
-                            .header("Authorization", "BEARER " + token)
-                            .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread/add")
-                            .post(formBody)
-                            .build();
+                if (isConnected()){
+                    if (!(text.equals("") || text.equals(null))) {
+                        t = new Threads();
+                        OkHttpClient client = new OkHttpClient();
+                        RequestBody formBody = new FormBody.Builder()
+                                .add("title", text)
+                                .build();
+                        Request request = new Request.Builder()
+                                .header("Authorization", "BEARER " + token)
+                                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread/add")
+                                .post(formBody)
+                                .build();
 
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
 
-                        }
+                            }
 
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
 
-                            try (ResponseBody responseBody = response.body()) {
-                                if (!response.isSuccessful())
-                                    throw new IOException("Unexpected code " + response);
-                                JSONObject root = new JSONObject(response.body().string());
-                                String status = root.getString("status");
-                                if (status.equals("ok")) {
+                                try (ResponseBody responseBody = response.body()) {
+                                    if (!response.isSuccessful())
+                                        throw new IOException("Unexpected code " + response);
+                                    JSONObject root = new JSONObject(response.body().string());
+                                    String status = root.getString("status");
+                                    if (status.equals("ok")) {
                                     /*String title = root.getString("title");
                                     result.add(new Threads(title));
                                     setAdapter(result);
                                     adapter.notifyDataSetChanged();*/
-                                    getThreads();
+                                        getThreads();
+                                    }
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
                                 }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
                             }
-                        }
 
-                    });
+                        });
 
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -200,6 +207,18 @@ public class Messages extends AppCompatActivity {
             }
 
         });
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo == null || !networkInfo.isConnected() ||
+                (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
+                        && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
+            return false;
+        }
+        return true;
     }
 
 }

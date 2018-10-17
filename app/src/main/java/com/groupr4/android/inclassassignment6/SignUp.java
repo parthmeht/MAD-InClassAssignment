@@ -92,6 +92,7 @@ public class SignUp extends AppCompatActivity {
                     else {
                         user = new User(firstNameEdit.getText().toString(),lastNameEdit.getText().toString(),emailEdit.getText().toString(),passwordEdit.getText().toString());
                         Log.d("User",user.toString());
+                        MainActivity.dialog.show();
                         signUp();
                     }
                 }else{
@@ -147,7 +148,6 @@ public class SignUp extends AppCompatActivity {
                                     editor.apply();
                                 }
                             });
-                            MainActivity.dialog.show();
                             Intent int_login = new Intent(SignUp.this, Messages.class);
                             Bundle bnd = new Bundle();
                             bnd.putSerializable(MainActivity.user_key, user);
@@ -158,18 +158,6 @@ public class SignUp extends AppCompatActivity {
                     }catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-            });
-        }
-    }
-
-    public void backgroundThreadShortToast(final String msg) {
-        if (msg != null) {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
                 }
             });
         }

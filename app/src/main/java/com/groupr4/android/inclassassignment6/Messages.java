@@ -42,6 +42,7 @@ public class Messages extends AppCompatActivity {
     ArrayList<Threads> result = null;
     private final OkHttpClient client = new OkHttpClient();
     private User user;
+    SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,16 +53,15 @@ public class Messages extends AppCompatActivity {
         newThread = (EditText) findViewById(R.id.editText7);
         logOff = (ImageButton) findViewById(R.id.imageButton3);
         add = (ImageButton) findViewById(R.id.imageButton2);
-
-
+        preferences  = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        setTitle("Message Threads");
         MainActivity.dialog.hide();
         if (getIntent() != null && getIntent().getExtras() != null) {
             user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
-            token = (String) getIntent().getExtras().getString(MainActivity.token_key);
+            //token = (String) getIntent().getExtras().getString(MainActivity.token_key);
             user_name = user.firstName + " " + user.lastName;
             userName.setText(user_name);
             //Log.d("tokenDemo", token);
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             token = preferences.getString("Token", "");
             if (!token.equalsIgnoreCase(""))
                 getThreads();
@@ -75,6 +75,8 @@ public class Messages extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 token = "";
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString("Token","");
                 MainActivity.dialog.show();
                 finish();
                 Intent intent_logOff = new Intent(Messages.this, MainActivity.class);
@@ -185,6 +187,7 @@ public class Messages extends AppCompatActivity {
 
                             @Override
                             public void run() {
+                                newThread.setText("");
                                 setAdapter(result);
                                 Log.d("addapDemo", "main");
                             }
@@ -198,4 +201,5 @@ public class Messages extends AppCompatActivity {
 
         });
     }
+
 }

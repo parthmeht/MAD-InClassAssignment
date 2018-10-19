@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private OkHttpClient client;
     private static String token;
     private User user;
-    public static String user_key="User";
-    public static String token_key="Token";
+    public static String user_key = "User";
+    public static String token_key = "Token";
     private EditText email;
     private EditText password;
     public static AlertDialog.Builder builder;
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent int_signup=new Intent(MainActivity.this,SignUp.class);
+                Intent int_signup = new Intent(MainActivity.this, SignUp.class);
                 startActivity(int_signup);
             }
         });
@@ -77,34 +77,24 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isConnected()){
-                    if(email.getText().toString().trim().length()==0 )
-                    {
+                if (isConnected()) {
+                    if (email.getText().toString().trim().length() == 0) {
                         Toast.makeText(MainActivity.this, "Enter email", Toast.LENGTH_SHORT).show();
-                    }
-                    else if(password.getText().toString().trim().length()==0)
-                    {
+                    } else if (password.getText().toString().trim().length() == 0) {
                         Toast.makeText(MainActivity.this, "Enter password", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
+                    } else {
                         user = new User(email.getText().toString().trim(), password.getText().toString().trim());
                         Log.d("demo", user.toString());
                         dialog.show();
                         login();
                     }
-                } else{
+                } else {
                     Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
                 }
 
             }
         });
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        MainActivity.dialog.hide();
     }
 
     private void login() {
@@ -127,12 +117,12 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
 
                 try (ResponseBody responseBody = response.body()) {
-                    if (!response.isSuccessful()){
+                    if (!response.isSuccessful()) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 dialog.hide();
-                                Toast.makeText(MainActivity.this, "Invalid Inputs", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainActivity.this, "User do not exist", Toast.LENGTH_LONG).show();
                             }
                         });
                         throw new IOException("Unexpected code " + response);
@@ -148,9 +138,8 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                             SharedPreferences.Editor editor = preferences.edit();
-                            editor.putString("Token",token);
+                            editor.putString("Token", token);
                             editor.apply();
-                            Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
                         }
                     });
                     if (status.equals("ok")) {
@@ -172,12 +161,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isConnected() {
-            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-            if (networkInfo == null || !networkInfo.isConnected() ||
-                    (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
-                            && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
+        if (networkInfo == null || !networkInfo.isConnected() ||
+                (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
+                        && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
             return false;
         }
         return true;

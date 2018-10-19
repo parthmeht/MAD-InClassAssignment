@@ -1,6 +1,7 @@
 package com.groupr4.android.inclassassignment6;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -10,12 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -26,7 +22,6 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 public class ThreadAdapter extends BaseAdapter implements ListAdapter {
     private User user;
@@ -86,13 +81,20 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
             @Override
             public void onClick(View v) {
                 delete(position);
-
                 list.remove(position);
                 notifyDataSetChanged();
-
             }
         });
-        // notifyDataSetChanged();
+
+        /*viewHolder.textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Threads selected_thread = (Threads) getItem(position);
+                Intent int_msg = new Intent(Messages.this, ChatRoomActivity.class);
+                int_msg.putExtra(Messages.ChatRoomThread_Key, selected_thread);
+                startActivity(int_msg);
+            }
+        });*/
         return view;
     }
     public void delete(final int position)
@@ -114,15 +116,6 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
             @Override
             public void onResponse(Call call, Response response) {
 
-                // result=list;
-                // list.clear();
-                // list.addAll(result);
-
-
-                //refreshEvents(list);
-
-
-
             }
         });
     }
@@ -130,7 +123,6 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
     public void refreshEvents(ArrayList<Threads> events) {
         events.clear();
         events.addAll(events);
-
     }
 
 

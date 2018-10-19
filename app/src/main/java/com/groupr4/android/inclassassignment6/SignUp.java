@@ -66,54 +66,45 @@ public class SignUp extends AppCompatActivity {
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isConnected()){
-                    if (firstNameEdit.getText() == null || firstNameEdit.getText().toString().equalsIgnoreCase("")){
+                if (isConnected()) {
+                    if (firstNameEdit.getText() == null || firstNameEdit.getText().toString().equalsIgnoreCase("")) {
                         firstNameEdit.setError("Enter First Name");
-                    }
-                    else if (lastNameEdit.getText() == null || lastNameEdit.getText().toString().equalsIgnoreCase("")){
+                    } else if (lastNameEdit.getText() == null || lastNameEdit.getText().toString().equalsIgnoreCase("")) {
                         lastNameEdit.setError("Enter Last Name");
-                    }
-                    else if (emailEdit.getText() == null || emailEdit.getText().toString().equalsIgnoreCase("")){
+                    } else if (emailEdit.getText() == null || emailEdit.getText().toString().equalsIgnoreCase("")) {
                         emailEdit.setError("Enter Email Id");
-                    }
-                    else if (passwordEdit.getText() == null || passwordEdit.getText().toString().equalsIgnoreCase("")){
+                    } else if (passwordEdit.getText() == null || passwordEdit.getText().toString().equalsIgnoreCase("")) {
                         passwordEdit.setError("Enter Password");
-                    }
-                    else if (confirmPasswordEdit.getText() == null || confirmPasswordEdit.getText().toString().equalsIgnoreCase("")){
+                    } else if (confirmPasswordEdit.getText() == null || confirmPasswordEdit.getText().toString().equalsIgnoreCase("")) {
                         confirmPasswordEdit.setError("Enter Confirm Password");
-                    }
-                    else if (passwordEdit.getText() != null
+                    } else if (passwordEdit.getText() != null
                             && !passwordEdit.getText().toString().equalsIgnoreCase("")
                             && confirmPasswordEdit.getText() != null
                             && !confirmPasswordEdit.getText().toString().equalsIgnoreCase("")
-                            && !passwordEdit.getText().toString().equalsIgnoreCase(confirmPasswordEdit.getText().toString())){
+                            && !passwordEdit.getText().toString().equalsIgnoreCase(confirmPasswordEdit.getText().toString())) {
                         confirmPasswordEdit.setError("Password and Confirm Password does not match");
-                    }
-                    else if(passwordEdit.getText().length()<6 || confirmPasswordEdit.getText().length()<6)
-                    {
+                    } else if (passwordEdit.getText().length() < 6 || confirmPasswordEdit.getText().length() < 6) {
                         passwordEdit.setError("Password has to be 6 or more than 6 characters");
-                    }
-                    else {
-                        user = new User(firstNameEdit.getText().toString(),lastNameEdit.getText().toString(),emailEdit.getText().toString(),passwordEdit.getText().toString());
-                        Log.d("User",user.toString());
-                        MainActivity.dialog.show();
+                    } else {
+                        user = new User(firstNameEdit.getText().toString(), lastNameEdit.getText().toString(), emailEdit.getText().toString(), passwordEdit.getText().toString());
+                        Log.d("User", user.toString());
                         signUp();
                     }
-                }else{
+                } else {
                     Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
                 }
             }
         });
     }
 
-    private void signUp(){
+    private void signUp() {
 
-        if (user!=null){
+        if (user != null) {
             RequestBody formBody = new FormBody.Builder()
                     .add("email", user.email)
                     .add("password", user.password)
-                    .add("fname",user.firstName)
-                    .add("lname",user.lastName)
+                    .add("fname", user.firstName)
+                    .add("lname", user.lastName)
                     .build();
             Request request = new Request.Builder()
                     .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/signup")
@@ -129,18 +120,29 @@ public class SignUp extends AppCompatActivity {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     try (ResponseBody responseBody = response.body()) {
-                        if (!response.isSuccessful()){
+
+                        if (!response.isSuccessful()) {
+                            Looper.prepare();
+                            Toast.makeText(SignUp.this, "User email already exists", Toast.LENGTH_SHORT).show();
+                            Looper.loop();
+/*
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(SignUp.this, "Invalid Inputs", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(SignUp.this, "User email already exists", Toast.LENGTH_LONG).show();
                                 }
                             });
+*/
+
+
                             throw new IOException("Unexpected code " + response);
                         }
+
+
                         JSONObject root = new JSONObject(response.body().string());
                         String status = root.getString("status");
-                        if (status.equalsIgnoreCase("ok")){
+
+                        if (status.equalsIgnoreCase("ok")) {
                             token = root.getString("token");
                             user.userId = root.getInt("user_id");
                             runOnUiThread(new Runnable() {
@@ -148,19 +150,25 @@ public class SignUp extends AppCompatActivity {
                                 public void run() {
                                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                                     SharedPreferences.Editor editor = preferences.edit();
-                                    editor.putString("Token",token);
+                                    editor.putString("Token", token);
                                     editor.apply();
                                     Toast.makeText(SignUp.this, "User Created Successfully", Toast.LENGTH_LONG).show();
                                 }
                             });
+                            //Looper.prepare();
+                            //MainActivity.dialog.show();
+                            //Looper.loop();
                             Intent int_login = new Intent(SignUp.this, Messages.class);
                             Bundle bnd = new Bundle();
                             bnd.putSerializable(MainActivity.user_key, user);
                             //bnd.putString(MainActivity.token_key, token);
                             int_login.putExtras(bnd);
                             startActivity(int_login);
+
+
                         }
-                    }catch (JSONException e) {
+
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }

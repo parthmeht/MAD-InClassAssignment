@@ -1,6 +1,8 @@
 package com.groupr4.android.inclassassignment6;
 
-public class Threads {
+import java.io.Serializable;
+
+public class Threads implements Serializable {
     String user_fname, user_lname, title, created_at;
     Integer id, user_id;
 

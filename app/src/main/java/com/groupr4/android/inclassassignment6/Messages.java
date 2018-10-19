@@ -1,21 +1,17 @@
 package com.groupr4.android.inclassassignment6;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,21 +39,23 @@ public class Messages extends AppCompatActivity {
     ThreadAdapter threadAdapter;
     Threads t;
     ArrayList<Threads> result = null;
+    public static String ChatRoomThread_Key = "thread";
     private final OkHttpClient client = new OkHttpClient();
     private User user;
-    SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messages);
+        Log.d("Messages", "Inside Messages");
 
         userName = (TextView) findViewById(R.id.textView);
         newThread = (EditText) findViewById(R.id.editText7);
         logOff = (ImageButton) findViewById(R.id.imageButton3);
         add = (ImageButton) findViewById(R.id.imageButton2);
-        preferences  = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        setTitle("Message Threads");
+        lv = (ListView) findViewById(R.id.myListView);
+
+
         MainActivity.dialog.hide();
         if (getIntent() != null && getIntent().getExtras() != null) {
             user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
@@ -65,10 +63,11 @@ public class Messages extends AppCompatActivity {
             user_name = user.firstName + " " + user.lastName;
             userName.setText(user_name);
             //Log.d("tokenDemo", token);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             token = preferences.getString("Token", "");
             if (!token.equalsIgnoreCase(""))
                 getThreads();
-            else{
+            else {
                 finish();
                 Intent intent_logOff = new Intent(Messages.this, MainActivity.class);
                 startActivity(intent_logOff);
@@ -78,8 +77,6 @@ public class Messages extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 token = "";
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("Token","");
                 MainActivity.dialog.show();
                 finish();
                 Intent intent_logOff = new Intent(Messages.this, MainActivity.class);
@@ -87,55 +84,58 @@ public class Messages extends AppCompatActivity {
             }
         });
 
+
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String text = newThread.getText().toString();
-                if (isConnected()){
-                    if (!(text.equals("") || text.equals(null))) {
-                        t = new Threads();
-                        OkHttpClient client = new OkHttpClient();
-                        RequestBody formBody = new FormBody.Builder()
-                                .add("title", text)
-                                .build();
-                        Request request = new Request.Builder()
-                                .header("Authorization", "BEARER " + token)
-                                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread/add")
-                                .post(formBody)
-                                .build();
+                if (!(text.equals("") || text.equals(null))) {
+                    t = new Threads();
+                    OkHttpClient client = new OkHttpClient();
+                    RequestBody formBody = new FormBody.Builder()
+                            .add("title", text)
+                            .build();
+                    Request request = new Request.Builder()
+                            .header("Authorization", "BEARER " + token)
+                            .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread/add")
+                            .post(formBody)
+                            .build();
 
-                        client.newCall(request).enqueue(new Callback() {
-                            @Override
-                            public void onFailure(Call call, IOException e) {
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
 
-                            }
+                        }
 
-                            @Override
-                            public void onResponse(Call call, Response response) throws IOException {
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
 
-                                try (ResponseBody responseBody = response.body()) {
-                                    if (!response.isSuccessful())
-                                        throw new IOException("Unexpected code " + response);
-                                    JSONObject root = new JSONObject(response.body().string());
-                                    String status = root.getString("status");
-                                    if (status.equals("ok")) {
+                            try (ResponseBody responseBody = response.body()) {
+                                if (!response.isSuccessful())
+                                    throw new IOException("Unexpected code " + response);
+                                JSONObject root = new JSONObject(response.body().string());
+                                String status = root.getString("status");
+                                if (status.equals("ok")) {
                                     /*String title = root.getString("title");
                                     result.add(new Threads(title));
                                     setAdapter(result);
                                     adapter.notifyDataSetChanged();*/
-                                        getThreads();
-                                    }
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            newThread.setText("");
+                                        }
+                                    });
+                                    getThreads();
                                 }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
+                        }
 
-                        });
+                    });
 
-                    }
-                }else{
-                    Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -148,12 +148,29 @@ public class Messages extends AppCompatActivity {
         //super.onBackPressed();
     }
 
+
+
     private void setAdapter(ArrayList<Threads> s) {
         MainActivity.dialog.hide();
         lv = (ListView) findViewById(R.id.myListView);
-        threadAdapter = new ThreadAdapter(user, s,this);
+        threadAdapter = new ThreadAdapter(user, s, this);
+        threadAdapter.notifyDataSetChanged();
         lv.setAdapter(threadAdapter);
 
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Threads selected_thread = (Threads) threadAdapter.getItem(position);
+                Intent int_msg = new Intent(Messages.this, ChatRoomActivity.class);
+                Bundle bnd = new Bundle();
+                bnd.putSerializable(MainActivity.user_key, user);
+                bnd.putSerializable(Messages.ChatRoomThread_Key, selected_thread);
+                int_msg.putExtras(bnd);
+                startActivity(int_msg);
+
+            }
+        });
     }
 
     private void getThreads() {
@@ -165,6 +182,7 @@ public class Messages extends AppCompatActivity {
 
             @Override
             public void onFailure(Call call, IOException e) {
+
 
             }
 
@@ -194,7 +212,6 @@ public class Messages extends AppCompatActivity {
 
                             @Override
                             public void run() {
-                                newThread.setText("");
                                 setAdapter(result);
                                 Log.d("addapDemo", "main");
                             }
@@ -208,17 +225,4 @@ public class Messages extends AppCompatActivity {
 
         });
     }
-
-    private boolean isConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-
-        if (networkInfo == null || !networkInfo.isConnected() ||
-                (networkInfo.getType() != ConnectivityManager.TYPE_WIFI
-                        && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE)) {
-            return false;
-        }
-        return true;
-    }
-
 }

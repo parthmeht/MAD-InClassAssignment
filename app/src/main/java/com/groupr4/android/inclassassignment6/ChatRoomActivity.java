@@ -42,6 +42,8 @@ public class ChatRoomActivity extends AppCompatActivity {
     private ImageButton addMessageButton;
     private User user;
     private EditText editNewMessage;
+    MsgAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,12 +84,16 @@ public class ChatRoomActivity extends AppCompatActivity {
                     }else{
                         message = editNewMessage.getText().toString();
                         addMessage(message);
+                        editNewMessage.setText("");
+
                     }
                 }else{
                     Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
                 }
             }
         });
+
+
     }
 
 
@@ -121,6 +127,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                         current_msg.user_lname=msg_JSONobj.getString("user_lname");
                         current_msg.msg_id=msg_JSONobj.getString("id");
                         current_msg.user_id=msg_JSONobj.getString("user_id");
+                        current_msg.msgContent=msg_JSONobj.getString("message");
                         current_msg.createdAt=msg_JSONobj.getString("created_at");
                         msg_list.add(current_msg);
                     }
@@ -178,7 +185,8 @@ public class ChatRoomActivity extends AppCompatActivity {
         ThreadName=(TextView)findViewById(R.id.txtThreadName);
         ThreadName.setText(current_thread.title);
         msg_listview=(ListView)findViewById(R.id.listMessages);
-        MsgAdapter adapter=new MsgAdapter(ChatRoomActivity.this,R.layout.add_message_layout,msg_list);
+        adapter  = new MsgAdapter(user, msg_list, this);
+        //MsgAdapter adapter=new MsgAdapter(ChatRoomActivity.this,R.layout.add_message_layout,msg_list);
         msg_listview.setAdapter(adapter);
     }
 

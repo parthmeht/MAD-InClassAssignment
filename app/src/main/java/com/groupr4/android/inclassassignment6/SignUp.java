@@ -5,12 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,6 +43,8 @@ public class SignUp extends AppCompatActivity {
     private final OkHttpClient client = new OkHttpClient();
     private User user;
     private String token;
+    public static AlertDialog.Builder builder;
+    public static AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,10 @@ public class SignUp extends AppCompatActivity {
         cancelButton = findViewById(R.id.buttonCancel);
         signUpButton = findViewById(R.id.buttonSignUp);
         setTitle("Sign Up");
+        builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        builder.setTitle("Loading").setView(inflater.inflate(R.layout.dialog_bar, null));
+        dialog = builder.create();
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,6 +95,7 @@ public class SignUp extends AppCompatActivity {
                     } else {
                         user = new User(firstNameEdit.getText().toString(), lastNameEdit.getText().toString(), emailEdit.getText().toString(), passwordEdit.getText().toString());
                         Log.d("User", user.toString());
+                        dialog.show();
                         signUp();
                     }
                 } else {
@@ -125,16 +133,6 @@ public class SignUp extends AppCompatActivity {
                             Looper.prepare();
                             Toast.makeText(SignUp.this, "User email already exists", Toast.LENGTH_SHORT).show();
                             Looper.loop();
-/*
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(SignUp.this, "User email already exists", Toast.LENGTH_LONG).show();
-                                }
-                            });
-*/
-
-
                             throw new IOException("Unexpected code " + response);
                         }
 
@@ -153,12 +151,8 @@ public class SignUp extends AppCompatActivity {
                                     editor.putString("Token", token);
                                     editor.apply();
                                     Toast.makeText(SignUp.this, "User Created Successfully", Toast.LENGTH_LONG).show();
-                                    MainActivity.dialog.show();
                                 }
                             });
-                            //Looper.prepare();
-                            //MainActivity.dialog.show();
-                            //Looper.loop();
                             Intent int_login = new Intent(SignUp.this, Messages.class);
                             Bundle bnd = new Bundle();
                             bnd.putSerializable(MainActivity.user_key, user);

@@ -17,13 +17,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 
-import javax.xml.transform.Source;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -146,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
                         Intent int_login = new Intent(MainActivity.this, Messages.class);
                         Bundle bnd = new Bundle();
                         bnd.putSerializable(MainActivity.user_key, user);
-                        //bnd.putString(MainActivity.token_key, token);
                         int_login.putExtras(bnd);
                         startActivity(int_login);
                     } else {

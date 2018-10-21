@@ -3,11 +3,12 @@ package com.groupr4.android.inclassassignment6;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -42,6 +43,8 @@ public class Messages extends AppCompatActivity implements TheardOperations{
     public static String ChatRoomThread_Key = "thread";
     private final OkHttpClient client = new OkHttpClient();
     private User user;
+    public static AlertDialog.Builder builder;
+    public static AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +58,11 @@ public class Messages extends AppCompatActivity implements TheardOperations{
         add = (ImageButton) findViewById(R.id.imageButton2);
         lv = (ListView) findViewById(R.id.myListView);
         setTitle("Message Threads");
+        builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        builder.setTitle("Loading").setView(inflater.inflate(R.layout.dialog_bar, null));
+        dialog = builder.create();
 
-        MainActivity.dialog.hide();
         if (getIntent() != null && getIntent().getExtras() != null) {
             user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
             user_name = user.firstName + " " + user.lastName;
@@ -87,6 +93,7 @@ public class Messages extends AppCompatActivity implements TheardOperations{
             @Override
             public void onClick(View v) {
                 String text = newThread.getText().toString();
+                dialog.show();
                 if (!(text.equals("") || text.equals(null))) {
                     t = new Threads();
                     OkHttpClient client = new OkHttpClient();
@@ -146,6 +153,11 @@ public class Messages extends AppCompatActivity implements TheardOperations{
 
     private void setAdapter(ArrayList<Threads> s) {
         MainActivity.dialog.hide();
+        if (SignUp.dialog != null)
+            SignUp.dialog.hide();
+        if (ChatRoomActivity.dialog!=null)
+            ChatRoomActivity.dialog.hide();
+        dialog.hide();
         lv = (ListView) findViewById(R.id.myListView);
         threadAdapter = new ThreadAdapter(user, s, this,this);
         lv.setAdapter(threadAdapter);
@@ -206,7 +218,6 @@ public class Messages extends AppCompatActivity implements TheardOperations{
 
     @Override
     public void deleteThreads(int id) {
-
         result.remove(id);
         getThreads();
     }

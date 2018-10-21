@@ -36,7 +36,7 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
         this.user = user;
         this.list = list;
         this.context = context;
-        this.theardOperationInterface=threadOperationInterface;
+        this.theardOperationInterface = threadOperationInterface;
         //notifyDataSetChanged();
     }
 
@@ -59,7 +59,7 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
 
-        result=new ArrayList<>();
+        result = new ArrayList<>();
         ViewHolder viewHolder;
 
         if (view == null) {
@@ -67,7 +67,7 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
             view = inflater.inflate(R.layout.message_list_view, null);
             viewHolder = new ViewHolder(view);
             view.setTag(viewHolder);
-        }else {
+        } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(view.getContext());
@@ -75,7 +75,7 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
         Threads th = (Threads) getItem(position);
         viewHolder.textView.setText(th.title);
         viewHolder.imageButton.setVisibility(View.INVISIBLE);
-        if (th.user_id.equals(user.userId)){
+        if (th.user_id.equals(user.userId)) {
             viewHolder.imageButton.setVisibility(View.VISIBLE);
         }
 
@@ -90,24 +90,18 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
         viewHolder.textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*
-                Threads selected_thread = (Threads) getItem(position);
-                Intent int_msg = new Intent(Messages.this, ChatRoomActivity.class);
-                int_msg.putExtra(Messages.ChatRoomThread_Key, selected_thread);
-                startActivity(int_msg);
-                */
                 theardOperationInterface.gotoChatroom(position);
             }
         });
 
         return view;
     }
-    public void delete(final int position)
-    {
+
+    public void delete(final int position) {
         Threads threads = (Threads) getItem(position);
-        Log.d("hello",threads.title);
+        Log.d("hello", threads.title);
         Request request = new Request.Builder()
-                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread/delete/"+threads.id)
+                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/thread/delete/" + threads.id)
                 .header("Authorization", "BEARER " + token)
                 .build();
 
@@ -122,7 +116,6 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
             public void onResponse(Call call, Response response) {
 
                 theardOperationInterface.deleteThreads(position);
-               //deleteThreads(position);
             }
         });
     }
@@ -133,8 +126,8 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
         ImageButton imageButton;
 
         public ViewHolder(View view) {
-            textView = (TextView)view.findViewById(R.id.textView3);
-            imageButton = (ImageButton)view.findViewById(R.id.imageButton);
+            textView = (TextView) view.findViewById(R.id.textView3);
+            imageButton = (ImageButton) view.findViewById(R.id.imageButton);
         }
     }
 }

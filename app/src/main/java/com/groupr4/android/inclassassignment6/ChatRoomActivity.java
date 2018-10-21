@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -43,6 +45,8 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
     private User user;
     private EditText editNewMessage;
     MsgAdapter adapter;
+    public static AlertDialog.Builder builder;
+    public static AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +56,10 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
         editNewMessage = findViewById(R.id.editNewMessage);
         setTitle("Chatroom");
         client = new OkHttpClient();
+        builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        builder.setTitle("Loading").setView(inflater.inflate(R.layout.dialog_bar, null));
+        dialog = builder.create();
         if(getIntent()!=null && getIntent().getExtras()!=null)
         {
             user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
@@ -67,6 +75,7 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
         findViewById(R.id.homeButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                dialog.show();
                 Intent intHome = new Intent(ChatRoomActivity.this, Messages.class);
                 Bundle bnd = new Bundle();
                 bnd.putSerializable(MainActivity.user_key, user);
@@ -79,7 +88,8 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
             @Override
             public void onClick(View v) {
                 if (isConnected()){
-                    String message = null;
+                    String message;
+                    dialog.show();
                     if (editNewMessage.getText().toString()==null ||  editNewMessage.getText().toString().equalsIgnoreCase("")){
                         Toast.makeText(getApplicationContext(), "Enter a message", Toast.LENGTH_LONG).show();
                     }else{
@@ -87,7 +97,6 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
                         MainActivity.dialog.show();
                         addMessage(message);
                         editNewMessage.setText("");
-
                     }
                 }else{
                     Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
@@ -188,9 +197,8 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
         ThreadName.setText(current_thread.title);
         msg_listview=(ListView)findViewById(R.id.listMessages);
         adapter  = new MsgAdapter(user, msg_list, this, this);
-        //MsgAdapter adapter=new MsgAdapter(ChatRoomActivity.this,R.layout.add_message_layout,msg_list);
         msg_listview.setAdapter(adapter);
-        MainActivity.dialog.hide();
+        dialog.hide();
     }
 
     private boolean isConnected() {

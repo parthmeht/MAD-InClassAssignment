@@ -30,12 +30,14 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
     private Context context;
     private final OkHttpClient client = new OkHttpClient();
     private String token;
+    TheardOperations theardOperationInterface;
 
-    public ThreadAdapter(User user, ArrayList<Threads> list, Context context) {
+    public ThreadAdapter(User user, ArrayList<Threads> list, Context context, TheardOperations threadOperationInterface) {
         this.user = user;
         this.list = list;
         this.context = context;
-        notifyDataSetChanged();
+        this.theardOperationInterface=threadOperationInterface;
+        //notifyDataSetChanged();
     }
 
     @Override
@@ -81,20 +83,23 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
             @Override
             public void onClick(View v) {
                 delete(position);
-                list.remove(position);
-                notifyDataSetChanged();
+
             }
         });
 
-        /*viewHolder.textView.setOnClickListener(new View.OnClickListener() {
+        viewHolder.textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /*
                 Threads selected_thread = (Threads) getItem(position);
                 Intent int_msg = new Intent(Messages.this, ChatRoomActivity.class);
                 int_msg.putExtra(Messages.ChatRoomThread_Key, selected_thread);
                 startActivity(int_msg);
+                */
+                theardOperationInterface.gotoChatroom(position);
             }
-        });*/
+        });
+
         return view;
     }
     public void delete(final int position)
@@ -116,13 +121,10 @@ public class ThreadAdapter extends BaseAdapter implements ListAdapter {
             @Override
             public void onResponse(Call call, Response response) {
 
+                theardOperationInterface.deleteThreads(position);
+               //deleteThreads(position);
             }
         });
-    }
-
-    public void refreshEvents(ArrayList<Threads> events) {
-        events.clear();
-        events.addAll(events);
     }
 
 

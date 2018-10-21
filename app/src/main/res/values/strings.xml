@@ -18,4 +18,5 @@
     <string name="txtEachMessage_display">Messages</string>
     <string name="txtUserMsg_display">User Name</string>
     <string name="txtMesgTime_display">Message Time</string>
+    <string name="messageHint">Type message to send</string>
 </resources>

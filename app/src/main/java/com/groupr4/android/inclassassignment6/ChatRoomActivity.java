@@ -31,7 +31,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class ChatRoomActivity extends AppCompatActivity {
+public class ChatRoomActivity extends AppCompatActivity implements ChatOperations{
 
     private Threads current_thread;
     private ArrayList<Msg> msg_list;
@@ -50,6 +50,7 @@ public class ChatRoomActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat_room);
         addMessageButton = findViewById(R.id.addMessageButton);
         editNewMessage = findViewById(R.id.editNewMessage);
+        setTitle("Chatroom");
         client = new OkHttpClient();
         if(getIntent()!=null && getIntent().getExtras()!=null)
         {
@@ -83,6 +84,7 @@ public class ChatRoomActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Enter a message", Toast.LENGTH_LONG).show();
                     }else{
                         message = editNewMessage.getText().toString();
+                        MainActivity.dialog.show();
                         addMessage(message);
                         editNewMessage.setText("");
 
@@ -119,16 +121,16 @@ public class ChatRoomActivity extends AppCompatActivity {
                     JSONObject root = new JSONObject(response.body().string().toString());
                     JSONArray msg_arr=root.getJSONArray("messages");
                     msg_list=new ArrayList<>();
-                    for(int i=0;i<msg_arr.length();i++)
+                    for(int i=msg_arr.length()-1;i>=0;i--)
                     {
-                        JSONObject msg_JSONobj=msg_arr.getJSONObject(i);
+                        JSONObject msg_json_obj=msg_arr.getJSONObject(i);
                         Msg current_msg=new Msg();
-                        current_msg.user_fname=msg_JSONobj.getString("user_fname");
-                        current_msg.user_lname=msg_JSONobj.getString("user_lname");
-                        current_msg.msg_id=msg_JSONobj.getString("id");
-                        current_msg.user_id=msg_JSONobj.getString("user_id");
-                        current_msg.msgContent=msg_JSONobj.getString("message");
-                        current_msg.createdAt=msg_JSONobj.getString("created_at");
+                        current_msg.user_fname=msg_json_obj.getString("user_fname");
+                        current_msg.user_lname=msg_json_obj.getString("user_lname");
+                        current_msg.msg_id=msg_json_obj.getString("id");
+                        current_msg.user_id=msg_json_obj.getString("user_id");
+                        current_msg.msgContent=msg_json_obj.getString("message");
+                        current_msg.createdAt=msg_json_obj.getString("created_at");
                         msg_list.add(current_msg);
                     }
 
@@ -185,9 +187,10 @@ public class ChatRoomActivity extends AppCompatActivity {
         ThreadName=(TextView)findViewById(R.id.txtThreadName);
         ThreadName.setText(current_thread.title);
         msg_listview=(ListView)findViewById(R.id.listMessages);
-        adapter  = new MsgAdapter(user, msg_list, this);
+        adapter  = new MsgAdapter(user, msg_list, this, this);
         //MsgAdapter adapter=new MsgAdapter(ChatRoomActivity.this,R.layout.add_message_layout,msg_list);
         msg_listview.setAdapter(adapter);
+        MainActivity.dialog.hide();
     }
 
     private boolean isConnected() {
@@ -202,5 +205,10 @@ public class ChatRoomActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public void deleteChat(int id) {
+        msg_list.remove(id);
+        getMessages();
+    }
 }
 

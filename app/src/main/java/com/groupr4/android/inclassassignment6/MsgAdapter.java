@@ -30,21 +30,24 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class  MsgAdapter extends BaseAdapter implements ListAdapter {
+public class MsgAdapter extends BaseAdapter implements ListAdapter {
 
     private final OkHttpClient client = new OkHttpClient();
     private static String token;
     private User user;
     private ArrayList<Msg> list;
     private Context context;
+    ChatOperations chatOperations;
 
 
-    public MsgAdapter(User user, ArrayList<Msg> list, Context context) {
+    public MsgAdapter(User user, ArrayList<Msg> list, Context context, ChatOperations chatOperations) {
         this.user = user;
         this.list = list;
         this.context = context;
+        this.chatOperations = chatOperations;
         notifyDataSetChanged();
     }
+
     @Override
     public int getCount() {
         return list.size();
@@ -66,71 +69,64 @@ public class  MsgAdapter extends BaseAdapter implements ListAdapter {
     @Override
     public View getView(final int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 
+        Msg current_msg = getItem(position);
+        if (current_msg != null) {
 
-        Msg current_msg=getItem(position);
-       if(current_msg!=null) {
+            ViewHolder viewHolder;
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.add_message_layout, null);
+                viewHolder = new ViewHolder();
+                viewHolder.UserName = (TextView) convertView.findViewById(R.id.txtUserName);
+                viewHolder.Messages = (TextView) convertView.findViewById(R.id.txteachMessgae);
+                viewHolder.MsgTime = (TextView) convertView.findViewById(R.id.txtMsgTime);
+                viewHolder.DeleteMsg = (ImageButton) convertView.findViewById(R.id.imgdeletemsg);
 
-           ViewHolder viewHolder;
-           if (convertView == null) {
-               LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-               convertView = inflater.inflate(R.layout.add_message_layout, null);
-               viewHolder = new ViewHolder();
-               viewHolder.UserName = (TextView) convertView.findViewById(R.id.txtUserName);
-               viewHolder.Messages = (TextView) convertView.findViewById(R.id.txteachMessgae);
-               viewHolder.MsgTime = (TextView) convertView.findViewById(R.id.txtMsgTime);
-               viewHolder.DeleteMsg = (ImageButton) convertView.findViewById(R.id.imgdeletemsg);
-
-               convertView.setTag(viewHolder);
-           } else {
-               viewHolder = (ViewHolder) convertView.getTag();
-           }
-           SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(convertView.getContext());
-           token = preferences.getString("Token", "");
-           Msg m = (Msg)getItem(position);
-           if (m.user_id.equals(user.userId.toString())){
-               viewHolder.DeleteMsg.setVisibility(View.VISIBLE);
-               viewHolder.UserName.setText("Me");
-           }
-           else
-           {
-               viewHolder.UserName.setText(current_msg.user_fname.trim() + " " + current_msg.user_lname.trim());
-           }
-           viewHolder.DeleteMsg.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View v) {
-                   delete(position);
-                   list.remove(position);
-                   notifyDataSetChanged();
-               }
-           });
-           if (current_msg.msgContent != null) {
-               viewHolder.Messages.setText(current_msg.msgContent.trim());
-           }
-           String date = messageTime(current_msg);
-           if(!(date.equals("") || date.equals(null)))
-           {
-               viewHolder.MsgTime.setText(date);
-           }
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(convertView.getContext());
+            token = preferences.getString("Token", "");
+            Msg m = (Msg) getItem(position);
+            if (m.user_id.equals(user.userId.toString())) {
+                viewHolder.DeleteMsg.setVisibility(View.VISIBLE);
+                viewHolder.UserName.setText("Me");
+            } else {
+                viewHolder.UserName.setText(current_msg.user_fname.trim() + " " + current_msg.user_lname.trim());
+            }
+            viewHolder.DeleteMsg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    delete(position);
+                }
+            });
+            if (current_msg.msgContent != null) {
+                viewHolder.Messages.setText(current_msg.msgContent.trim());
+            }
+            String date = messageTime(current_msg);
+            if (!(date.equals("") || date.equals(null))) {
+                viewHolder.MsgTime.setText(date);
+            }
 
 
-       }
+        }
         return convertView;
     }
 
 
-    private static class ViewHolder
-    {
+    private static class ViewHolder {
         TextView Messages;
         TextView UserName;
         TextView MsgTime;
         ImageButton DeleteMsg;
 
     }
-    public void delete(final int position)
-    {
+
+    public void delete(final int position) {
         Msg msg = (Msg) getItem(position);
         Request request = new Request.Builder()
-                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/message/delete/"+msg.msg_id)
+                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/message/delete/" + msg.msg_id)
                 .header("Authorization", "BEARER " + token)
                 .build();
 
@@ -143,16 +139,15 @@ public class  MsgAdapter extends BaseAdapter implements ListAdapter {
 
             @Override
             public void onResponse(Call call, Response response) {
-
+                chatOperations.deleteChat(position);
             }
         });
     }
 
-    public String messageTime(Msg msg)
-    {
+    public String messageTime(Msg msg) {
         PrettyTime prettyTime = new PrettyTime();
 
-        String dateString=msg.createdAt;
+        String dateString = msg.createdAt;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd kk:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -164,7 +159,7 @@ public class  MsgAdapter extends BaseAdapter implements ListAdapter {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return  prettyTime.format(convertedDate);
+        return prettyTime.format(convertedDate);
 
     }
 }

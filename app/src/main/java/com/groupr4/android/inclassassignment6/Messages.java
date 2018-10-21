@@ -29,7 +29,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class Messages extends AppCompatActivity {
+public class Messages extends AppCompatActivity implements TheardOperations{
 
     TextView userName;
     EditText newThread;
@@ -54,15 +54,13 @@ public class Messages extends AppCompatActivity {
         logOff = (ImageButton) findViewById(R.id.imageButton3);
         add = (ImageButton) findViewById(R.id.imageButton2);
         lv = (ListView) findViewById(R.id.myListView);
-
+        setTitle("Message Threads");
 
         MainActivity.dialog.hide();
         if (getIntent() != null && getIntent().getExtras() != null) {
             user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
-            //token = (String) getIntent().getExtras().getString(MainActivity.token_key);
             user_name = user.firstName + " " + user.lastName;
             userName.setText(user_name);
-            //Log.d("tokenDemo", token);
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             token = preferences.getString("Token", "");
             if (!token.equalsIgnoreCase(""))
@@ -116,10 +114,6 @@ public class Messages extends AppCompatActivity {
                                 JSONObject root = new JSONObject(response.body().string());
                                 String status = root.getString("status");
                                 if (status.equals("ok")) {
-                                    /*String title = root.getString("title");
-                                    result.add(new Threads(title));
-                                    setAdapter(result);
-                                    adapter.notifyDataSetChanged();*/
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -153,24 +147,8 @@ public class Messages extends AppCompatActivity {
     private void setAdapter(ArrayList<Threads> s) {
         MainActivity.dialog.hide();
         lv = (ListView) findViewById(R.id.myListView);
-        threadAdapter = new ThreadAdapter(user, s, this);
-        threadAdapter.notifyDataSetChanged();
+        threadAdapter = new ThreadAdapter(user, s, this,this);
         lv.setAdapter(threadAdapter);
-
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                Threads selected_thread = (Threads) threadAdapter.getItem(position);
-                Intent int_msg = new Intent(Messages.this, ChatRoomActivity.class);
-                Bundle bnd = new Bundle();
-                bnd.putSerializable(MainActivity.user_key, user);
-                bnd.putSerializable(Messages.ChatRoomThread_Key, selected_thread);
-                int_msg.putExtras(bnd);
-                startActivity(int_msg);
-
-            }
-        });
     }
 
     private void getThreads() {
@@ -196,7 +174,7 @@ public class Messages extends AppCompatActivity {
                     if (status.equalsIgnoreCase("ok")) {
                         result = new ArrayList<>();
                         JSONArray source = root.getJSONArray("threads");
-                        for (int i = 0; i < source.length(); i++) {
+                        for (int i = source.length()-1; i >=0 ; i--) {
                             JSONObject sourceJSON = source.getJSONObject(i);
                             Threads threads = new Threads();
                             threads.user_fname = sourceJSON.getString("user_fname");
@@ -224,5 +202,24 @@ public class Messages extends AppCompatActivity {
             }
 
         });
+    }
+
+    @Override
+    public void deleteThreads(int id) {
+
+        result.remove(id);
+        getThreads();
+    }
+
+    @Override
+    public void gotoChatroom(int id) {
+        Threads selected_thread = (Threads) threadAdapter.getItem(id);
+        Intent int_msg = new Intent(Messages.this, ChatRoomActivity.class);
+        Bundle bnd = new Bundle();
+        bnd.putSerializable(MainActivity.user_key, user);
+        bnd.putSerializable(Messages.ChatRoomThread_Key, selected_thread);
+        int_msg.putExtras(bnd);
+        startActivity(int_msg);
+        MainActivity.dialog.show();
     }
 }

@@ -153,6 +153,7 @@ public class SignUp extends AppCompatActivity {
                                     editor.putString("Token", token);
                                     editor.apply();
                                     Toast.makeText(SignUp.this, "User Created Successfully", Toast.LENGTH_LONG).show();
+                                    MainActivity.dialog.show();
                                 }
                             });
                             //Looper.prepare();
@@ -164,8 +165,6 @@ public class SignUp extends AppCompatActivity {
                             //bnd.putString(MainActivity.token_key, token);
                             int_login.putExtras(bnd);
                             startActivity(int_login);
-
-
                         }
 
                     } catch (JSONException e) {

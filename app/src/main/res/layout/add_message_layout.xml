@@ -60,7 +60,7 @@
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:visibility="visible"
+            android:visibility="invisible"
             app:srcCompat="@drawable/deletemsg" />
     </RelativeLayout>
 

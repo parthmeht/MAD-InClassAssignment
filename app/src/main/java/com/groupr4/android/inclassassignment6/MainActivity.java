@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 dialog.hide();
-                                Toast.makeText(MainActivity.this, "User do not exist", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainActivity.this, "Incorrect email and/or password", Toast.LENGTH_LONG).show();
                             }
                         });
                         throw new IOException("Unexpected code " + response);

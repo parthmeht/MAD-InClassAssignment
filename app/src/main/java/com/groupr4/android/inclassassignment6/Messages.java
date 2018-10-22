@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -100,8 +101,8 @@ public class Messages extends AppCompatActivity implements TheardOperations {
             @Override
             public void onClick(View v) {
                 String text = newThread.getText().toString();
-                dialog.show();
                 if (!(text.equals("") || text.equals(null))) {
+                    dialog.show();
                     t = new Threads();
                     OkHttpClient client = new OkHttpClient();
                     RequestBody formBody = new FormBody.Builder()
@@ -145,10 +146,19 @@ public class Messages extends AppCompatActivity implements TheardOperations {
                     });
 
                 }
+                else
+                {
+                    Toast.makeText(Messages.this, "Enter a valid thread title", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        dialog.hide();
     }
 
     private void setAdapter(ArrayList<Threads> s) {
@@ -230,6 +240,6 @@ public class Messages extends AppCompatActivity implements TheardOperations {
         bnd.putSerializable(Messages.ChatRoomThread_Key, selected_thread);
         int_msg.putExtras(bnd);
         startActivity(int_msg);
-        MainActivity.dialog.show();
+        dialog.show();
     }
 }

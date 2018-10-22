@@ -92,12 +92,13 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
             public void onClick(View v) {
                 if (isConnected()) {
                     String message;
-                    dialog.show();
+
                     if (editNewMessage.getText().toString() == null || editNewMessage.getText().toString().equalsIgnoreCase("")) {
                         Toast.makeText(getApplicationContext(), "Enter a message", Toast.LENGTH_LONG).show();
                     } else {
+                        dialog.show();
                         message = editNewMessage.getText().toString();
-                        MainActivity.dialog.show();
+                        //dialog.show();
                         addMessage(message);
                         editNewMessage.setText("");
                     }

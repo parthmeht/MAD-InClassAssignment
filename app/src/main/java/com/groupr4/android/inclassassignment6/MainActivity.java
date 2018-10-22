@@ -107,6 +107,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+    }
+
     private void login() {
         RequestBody formBody = new FormBody.Builder()
                 .add("email", user.email)

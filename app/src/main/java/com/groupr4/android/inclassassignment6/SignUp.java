@@ -130,14 +130,16 @@ public class SignUp extends AppCompatActivity {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     try (ResponseBody responseBody = response.body()) {
-                        JSONObject root = new JSONObject(response.body().string());
-                        String error_msg = root.getString("message");
                         if (!response.isSuccessful()) {
+                            JSONObject root = new JSONObject(response.body().string());
+                            String error_msg = root.getString("message");
                             Looper.prepare();
+                            dialog.hide();
                             Toast.makeText(SignUp.this, error_msg , Toast.LENGTH_SHORT).show();
                             Looper.loop();
                             throw new IOException("Unexpected code " + response);
                         }
+                        JSONObject root = new JSONObject(response.body().string());
                         String status = root.getString("status");
 
                         if (status.equalsIgnoreCase("ok")) {

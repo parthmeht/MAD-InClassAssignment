@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -148,17 +150,17 @@ public class SignUp extends AppCompatActivity {
                                 public void run() {
                                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                                     SharedPreferences.Editor editor = preferences.edit();
-                                    editor.putString("Token", token);
+                                    Gson gson = new Gson();
+                                    editor.putString(MainActivity.token_key, token);
+                                    String userString = gson.toJson(user);
+                                    editor.putString(MainActivity.user_key, userString);
                                     editor.apply();
                                     Toast.makeText(SignUp.this, "User Created Successfully", Toast.LENGTH_LONG).show();
                                 }
                             });
                             Intent int_login = new Intent(SignUp.this, Messages.class);
-                            Bundle bnd = new Bundle();
-                            bnd.putSerializable(MainActivity.user_key, user);
-                            //bnd.putString(MainActivity.token_key, token);
-                            int_login.putExtras(bnd);
                             startActivity(int_login);
+                            finish();
                         }
 
                     } catch (JSONException e) {

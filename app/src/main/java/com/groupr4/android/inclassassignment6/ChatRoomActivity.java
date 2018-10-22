@@ -17,6 +17,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +35,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class ChatRoomActivity extends AppCompatActivity implements ChatOperations{
+public class ChatRoomActivity extends AppCompatActivity implements ChatOperations {
 
     private Threads current_thread;
     private ArrayList<Msg> msg_list;
@@ -60,16 +62,17 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
         LayoutInflater inflater = this.getLayoutInflater();
         builder.setTitle("Loading").setView(inflater.inflate(R.layout.dialog_bar, null));
         dialog = builder.create();
-        if(getIntent()!=null && getIntent().getExtras()!=null)
-        {
-            user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
-            current_thread = (Threads) getIntent().getExtras().getSerializable(Messages.ChatRoomThread_Key);
+        if (getIntent() != null && getIntent().getExtras() != null) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            token = preferences.getString("Token", "");
-            if(token!=null) {
+            //user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
+            String userString = preferences.getString(MainActivity.user_key, null);
+            Gson gson = new Gson();
+            user = gson.fromJson(userString, User.class);
+            current_thread = (Threads) getIntent().getExtras().getSerializable(Messages.ChatRoomThread_Key);
+            token = preferences.getString(MainActivity.token_key, null);
+            if (token != null) {
                 getMessages();
             }
-
         }
 
         findViewById(R.id.homeButton).setOnClickListener(new View.OnClickListener() {
@@ -77,9 +80,9 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
             public void onClick(View v) {
                 dialog.show();
                 Intent intHome = new Intent(ChatRoomActivity.this, Messages.class);
-                Bundle bnd = new Bundle();
+                /*Bundle bnd = new Bundle();
                 bnd.putSerializable(MainActivity.user_key, user);
-                intHome.putExtras(bnd);
+                intHome.putExtras(bnd);*/
                 startActivity(intHome);
             }
         });
@@ -87,18 +90,18 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
         addMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isConnected()){
+                if (isConnected()) {
                     String message;
                     dialog.show();
-                    if (editNewMessage.getText().toString()==null ||  editNewMessage.getText().toString().equalsIgnoreCase("")){
+                    if (editNewMessage.getText().toString() == null || editNewMessage.getText().toString().equalsIgnoreCase("")) {
                         Toast.makeText(getApplicationContext(), "Enter a message", Toast.LENGTH_LONG).show();
-                    }else{
+                    } else {
                         message = editNewMessage.getText().toString();
                         MainActivity.dialog.show();
                         addMessage(message);
                         editNewMessage.setText("");
                     }
-                }else{
+                } else {
                     Toast.makeText(getApplicationContext(), "No Internet Connection!", Toast.LENGTH_LONG).show();
                 }
             }
@@ -108,11 +111,10 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
     }
 
 
-    public void getMessages()
-    {
+    public void getMessages() {
         Request request = new Request.Builder()
-                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/messages/"+current_thread.id)
-                .header("Authorization","BEARER "+token)
+                .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/messages/" + current_thread.id)
+                .header("Authorization", "BEARER " + token)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -124,22 +126,21 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
             @Override
             public void onResponse(Call call, Response response) throws IOException {
 
-                try(ResponseBody responseBody = response.body())
-                {
-                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+                try (ResponseBody responseBody = response.body()) {
+                    if (!response.isSuccessful())
+                        throw new IOException("Unexpected code " + response);
                     JSONObject root = new JSONObject(response.body().string().toString());
-                    JSONArray msg_arr=root.getJSONArray("messages");
-                    msg_list=new ArrayList<>();
-                    for(int i=msg_arr.length()-1;i>=0;i--)
-                    {
-                        JSONObject msg_json_obj=msg_arr.getJSONObject(i);
-                        Msg current_msg=new Msg();
-                        current_msg.user_fname=msg_json_obj.getString("user_fname");
-                        current_msg.user_lname=msg_json_obj.getString("user_lname");
-                        current_msg.msg_id=msg_json_obj.getString("id");
-                        current_msg.user_id=msg_json_obj.getString("user_id");
-                        current_msg.msgContent=msg_json_obj.getString("message");
-                        current_msg.createdAt=msg_json_obj.getString("created_at");
+                    JSONArray msg_arr = root.getJSONArray("messages");
+                    msg_list = new ArrayList<>();
+                    for (int i = msg_arr.length() - 1; i >= 0; i--) {
+                        JSONObject msg_json_obj = msg_arr.getJSONObject(i);
+                        Msg current_msg = new Msg();
+                        current_msg.user_fname = msg_json_obj.getString("user_fname");
+                        current_msg.user_lname = msg_json_obj.getString("user_lname");
+                        current_msg.msg_id = msg_json_obj.getString("id");
+                        current_msg.user_id = msg_json_obj.getString("user_id");
+                        current_msg.msgContent = msg_json_obj.getString("message");
+                        current_msg.createdAt = msg_json_obj.getString("created_at");
                         msg_list.add(current_msg);
                     }
 
@@ -157,14 +158,14 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
         });
     }
 
-    public void addMessage(String message){
+    public void addMessage(String message) {
         RequestBody formBody = new FormBody.Builder()
                 .add("message", message)
                 .add("thread_id", String.valueOf(current_thread.id))
                 .build();
         Request request = new Request.Builder()
                 .url("http://ec2-18-234-222-229.compute-1.amazonaws.com/api/message/add")
-                .header("Authorization","BEARER "+token)
+                .header("Authorization", "BEARER " + token)
                 .post(formBody)
                 .build();
         client.newCall(request).enqueue(new Callback() {
@@ -175,28 +176,26 @@ public class ChatRoomActivity extends AppCompatActivity implements ChatOperation
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                try(ResponseBody responseBody = response.body())
-                {
+                try (ResponseBody responseBody = response.body()) {
                     if (!response.isSuccessful())
                         throw new IOException("Unexpected code " + response);
                     JSONObject root = new JSONObject(response.body().string());
                     String status = root.getString("status");
-                    if (status.equalsIgnoreCase("ok")){
+                    if (status.equalsIgnoreCase("ok")) {
                         getMessages();
                     }
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
     }
 
-    public void setListView()
-    {
-        ThreadName=(TextView)findViewById(R.id.txtThreadName);
+    public void setListView() {
+        ThreadName = (TextView) findViewById(R.id.txtThreadName);
         ThreadName.setText(current_thread.title);
-        msg_listview=(ListView)findViewById(R.id.listMessages);
-        adapter  = new MsgAdapter(user, msg_list, this, this);
+        msg_listview = (ListView) findViewById(R.id.listMessages);
+        adapter = new MsgAdapter(user, msg_list, this, this);
         msg_listview.setAdapter(adapter);
         dialog.hide();
     }

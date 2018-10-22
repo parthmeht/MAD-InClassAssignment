@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,6 +65,16 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         builder.setTitle("Loading").setView(inflater.inflate(R.layout.dialog_bar, null));
         dialog = builder.create();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        token = sharedPref.getString("Token", null);
+
+        if (token != null) {
+            Log.d("demo", "onCreate: " + token);
+            Intent intent = new Intent(this, Messages.class);
+            startActivity(intent);
+            finish();
+        }
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,16 +148,17 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                             SharedPreferences.Editor editor = preferences.edit();
-                            editor.putString("Token", token);
+                            Gson gson = new Gson();
+                            editor.putString(MainActivity.token_key, token);
+                            String userString = gson.toJson(user);
+                            editor.putString(MainActivity.user_key, userString);
                             editor.apply();
                         }
                     });
                     if (status.equals("ok")) {
                         Intent int_login = new Intent(MainActivity.this, Messages.class);
-                        Bundle bnd = new Bundle();
-                        bnd.putSerializable(MainActivity.user_key, user);
-                        int_login.putExtras(bnd);
                         startActivity(int_login);
+                        finish();
                     } else {
                         Toast.makeText(MainActivity.this, "User do not exist", Toast.LENGTH_SHORT).show();
                     }

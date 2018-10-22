@@ -14,6 +14,8 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +32,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class Messages extends AppCompatActivity implements TheardOperations{
+public class Messages extends AppCompatActivity implements TheardOperations {
 
     TextView userName;
     EditText newThread;
@@ -62,13 +64,15 @@ public class Messages extends AppCompatActivity implements TheardOperations{
         LayoutInflater inflater = this.getLayoutInflater();
         builder.setTitle("Loading").setView(inflater.inflate(R.layout.dialog_bar, null));
         dialog = builder.create();
-
-        if (getIntent() != null && getIntent().getExtras() != null) {
-            user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (getIntent() != null) {
+            String userString = preferences.getString(MainActivity.user_key, null);
+            Gson gson = new Gson();
+            user = gson.fromJson(userString, User.class);
+            //user = (User) getIntent().getExtras().getSerializable(MainActivity.user_key);
             user_name = user.firstName + " " + user.lastName;
             userName.setText(user_name);
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            token = preferences.getString("Token", "");
+            token = preferences.getString(MainActivity.token_key, null);
             if (!token.equalsIgnoreCase(""))
                 getThreads();
             else {
@@ -81,10 +85,13 @@ public class Messages extends AppCompatActivity implements TheardOperations{
             @Override
             public void onClick(View v) {
                 token = "";
-                MainActivity.dialog.show();
-                finish();
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(MainActivity.token_key, null);
+                editor.putString(MainActivity.user_key, null);
+                editor.commit();
                 Intent intent_logOff = new Intent(Messages.this, MainActivity.class);
                 startActivity(intent_logOff);
+                finish();
             }
         });
 
@@ -144,22 +151,15 @@ public class Messages extends AppCompatActivity implements TheardOperations{
 
     }
 
-    @Override
-    public void onBackPressed() {
-        //super.onBackPressed();
-    }
-
-
-
     private void setAdapter(ArrayList<Threads> s) {
         MainActivity.dialog.hide();
         if (SignUp.dialog != null)
             SignUp.dialog.hide();
-        if (ChatRoomActivity.dialog!=null)
+        if (ChatRoomActivity.dialog != null)
             ChatRoomActivity.dialog.hide();
         dialog.hide();
         lv = (ListView) findViewById(R.id.myListView);
-        threadAdapter = new ThreadAdapter(user, s, this,this);
+        threadAdapter = new ThreadAdapter(user, s, this, this);
         lv.setAdapter(threadAdapter);
     }
 
@@ -186,7 +186,7 @@ public class Messages extends AppCompatActivity implements TheardOperations{
                     if (status.equalsIgnoreCase("ok")) {
                         result = new ArrayList<>();
                         JSONArray source = root.getJSONArray("threads");
-                        for (int i = source.length()-1; i >=0 ; i--) {
+                        for (int i = source.length() - 1; i >= 0; i--) {
                             JSONObject sourceJSON = source.getJSONObject(i);
                             Threads threads = new Threads();
                             threads.user_fname = sourceJSON.getString("user_fname");
@@ -227,7 +227,6 @@ public class Messages extends AppCompatActivity implements TheardOperations{
         Threads selected_thread = (Threads) threadAdapter.getItem(id);
         Intent int_msg = new Intent(Messages.this, ChatRoomActivity.class);
         Bundle bnd = new Bundle();
-        bnd.putSerializable(MainActivity.user_key, user);
         bnd.putSerializable(Messages.ChatRoomThread_Key, selected_thread);
         int_msg.putExtras(bnd);
         startActivity(int_msg);
